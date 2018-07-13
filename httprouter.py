@@ -68,7 +68,14 @@ class HttpRouter():
             (r'^/files/(.*)$', {'function': self.serve_file, 'secure': False}),
             ('^/(display)$', {'function': self.serve_file, 'secure': False}),
             (r'^/pollDisplay$', {'function': self.pollDisplay, 'secure': False}),
-            (r'^/action/(.*)/(.*)$', {'function': self.do_action, 'secure': False})
+            (r'^/pollTablet$', {'function': self.pollTablet, 'secure': False}),
+            (r'^/login/(.*)$', {'function': self.login, 'secure': False}),
+            (r'^/logout$', {'function': self.logout, 'secure': False}),
+            (r'^/vote/(.*)$', {'function': self.vote, 'secure': False}),
+            (r'^/config/(.*)/(.*)$', {'function': self.vote_config, 'secure': False}),
+            (r'^/soundboard/(.*)$', {'function': self.soundboard, 'secure': False}),
+            (r'^/mainscreen/(.*)$', {'function': self.mainscreen, 'secure': False}),
+            (r'^/register/(.*)/(.*)/(.*)$', {'function': self.register, 'secure': False})
         ]
         self.html_dir = os.path.join('', 'html')
         
@@ -211,7 +218,42 @@ class HttpRouter():
         self.do_json_header()
         return json.dumps(display_data).encode()
 
-    def do_action(self, arg1, arg2):
-        success = SpaceModel().playerAction(arg1, arg2)
+    def pollTablet(self):
+        display_data = SpaceModel().pollTablet()
+        self.do_json_header()
+        return json.dumps(display_data).encode()
+
+    def login(self, uid):
+        success = SpaceModel().login(uid)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def vote(self, gungees):
+        success = SpaceModel().vote(gungee)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def vote_config(self, count, mode):
+        success = SpaceModel().vote_config(count, mode)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def soundboard(self, id):
+        success = SpaceModel().soundboard(id)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def mainscreen(self, mode):
+        success = SpaceModel().mainscreen(mode)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def logout(self):
+        success = SpaceModel().logout()
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def register(self, uid, name, privilege):
+        success = SpaceModel().register(uid, name, privilege)
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()

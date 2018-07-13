@@ -23,5 +23,26 @@ class SpaceModel(object):
     def pollDisplay(self):
         return self.controller.pollDisplay()
 
-    def doAction(self, arg1, arg2):
-        return self.controller.doAction(arg1, arg2)
+    def pollTablet(self):
+        return self.controller.pollTablet()
+
+    def login(self, uid):
+        return self.controller.login(uid)
+
+    def vote(self, gungees):
+        return self.controller.vote(gungee)
+
+    def vote_config(self, count, mode):
+        return self.controller.vote_config(count, mode)
+
+    def soundboard(self, id):
+        return self.controller.soundboard(id)
+
+    def mainscreen(self, mode):
+        return self.controller.mainscreen(mode)
+
+    def logout(self):
+        return self.controller.logout(mode)
+
+    def register(self, uid, name, privilege):
+        return self.controller.register(uid, name, privilege)
