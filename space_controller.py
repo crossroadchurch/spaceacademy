@@ -23,6 +23,8 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.current_name = ""
         self.max_votes = 0
         self.vote_mode = 0
+        self.mainscreen_mode = 0
+        self.terminal_mode = 0
         self.millionaire_server = SpaceServer(self)
         SpaceModel.create()
         SpaceModel().setController(self)
@@ -37,14 +39,13 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
 
     def pollDisplay(self):
         return {
-            "update_id": self.update_id,
-            "key": "value"
+            "mode": self.mainscreen_mode
         }
 
-
-    def doAction(self, arg1, arg2):
-        
-        return True
+    def pollTerminal(self):
+        return {
+            "mode": self.terminal_mode
+        }
 
 
     def login(self, uid):
@@ -128,6 +129,13 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
             db.close()
             print("User " + name + " (" + str(uid) + ") updated")
         return True
+
+    def mainscreen(self, mode):
+        if self.mainscreen_mode != mode:
+            self.mainscreen_mode = mode
+        return True
+
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

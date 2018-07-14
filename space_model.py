@@ -23,8 +23,8 @@ class SpaceModel(object):
     def pollDisplay(self):
         return self.controller.pollDisplay()
 
-    def pollTablet(self):
-        return self.controller.pollTablet()
+    def pollTerminal(self):
+        return self.controller.pollTerminal()
 
     def login(self, uid):
         return self.controller.login(uid)

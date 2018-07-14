@@ -66,9 +66,9 @@ class HttpRouter():
         self.routes = [
             ('^/$', {'function': self.serve_file, 'secure': False}),
             (r'^/files/(.*)$', {'function': self.serve_file, 'secure': False}),
-            ('^/(display)$', {'function': self.serve_file, 'secure': False}),
+            ('^/(terminal)$', {'function': self.serve_file, 'secure': False}),
             (r'^/pollDisplay$', {'function': self.pollDisplay, 'secure': False}),
-            (r'^/pollTablet$', {'function': self.pollTablet, 'secure': False}),
+            (r'^/pollTerminal$', {'function': self.pollTerminal, 'secure': False}),
             (r'^/login/(.*)$', {'function': self.login, 'secure': False}),
             (r'^/logout$', {'function': self.logout, 'secure': False}),
             (r'^/vote/(.*)$', {'function': self.vote, 'secure': False}),
@@ -181,8 +181,8 @@ class HttpRouter():
         #print('serve file request %s' % file_name)
         if not file_name:
             file_name = 'index.html'
-        elif file_name == 'display':
-            file_name = 'display.html'
+        elif file_name == 'terminal':
+            file_name = 'terminal.html'
         path = os.path.normpath(os.path.join(self.html_dir, file_name))
         if not path.startswith(self.html_dir):
             return self.do_not_found()
@@ -218,8 +218,8 @@ class HttpRouter():
         self.do_json_header()
         return json.dumps(display_data).encode()
 
-    def pollTablet(self):
-        display_data = SpaceModel().pollTablet()
+    def pollTerminal(self):
+        display_data = SpaceModel().pollTerminal()
         self.do_json_header()
         return json.dumps(display_data).encode()
 
