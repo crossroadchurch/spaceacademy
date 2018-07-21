@@ -30,19 +30,25 @@ class SpaceModel(object):
         return self.controller.login(uid)
 
     def vote(self, gungees):
-        return self.controller.vote(gungee)
+        return self.controller.vote(gungees)
 
     def vote_config(self, count, mode):
         return self.controller.vote_config(count, mode)
 
-    def soundboard(self, id):
-        return self.controller.soundboard(id)
+    def play_sound(self, id, vis):
+        return self.controller.play_sound(id, vis)
 
     def mainscreen(self, mode):
         return self.controller.mainscreen(mode)
 
+    def termmode(self, mode):
+        return self.controller.termmode(mode)
+
     def logout(self):
-        return self.controller.logout(mode)
+        return self.controller.logout()
+
+    def soundboard(self):
+        return self.controller.soundboard()
 
     def register(self, uid, name, privilege):
         return self.controller.register(uid, name, privilege)

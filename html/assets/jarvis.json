@@ -1,0 +1,16 @@
+{
+    "sounds": [
+        {
+            "filename": "files/assets/one.wav",
+            "caption": "This is file one"
+        },
+        {
+            "filename": "files/assets/two.wav",
+            "caption": "This is file two"
+        },
+        {
+            "filename": "files/assets/three.wav",
+            "caption": "This is file three"
+        }
+    ]
+}

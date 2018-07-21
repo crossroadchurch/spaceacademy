@@ -70,11 +70,13 @@ class HttpRouter():
             (r'^/pollDisplay$', {'function': self.pollDisplay, 'secure': False}),
             (r'^/pollTerminal$', {'function': self.pollTerminal, 'secure': False}),
             (r'^/login/(.*)$', {'function': self.login, 'secure': False}),
-            (r'^/logout$', {'function': self.logout, 'secure': False}),
-            (r'^/vote/(.*)$', {'function': self.vote, 'secure': False}),
-            (r'^/config/(.*)/(.*)$', {'function': self.vote_config, 'secure': False}),
+            (r'^/logout/(.*)$', {'function': self.logout, 'secure': False}),
             (r'^/soundboard/(.*)$', {'function': self.soundboard, 'secure': False}),
+            (r'^/vote/(.*)$', {'function': self.vote, 'secure': False}),
+            (r'^/vote_config/(.*)/(.*)$', {'function': self.vote_config, 'secure': False}),
+            (r'^/play_sound/(.*)/(.*)$', {'function': self.play_sound, 'secure': False}),
             (r'^/mainscreen/(.*)$', {'function': self.mainscreen, 'secure': False}),
+            (r'^/termmode/(.*)$', {'function': self.termmode, 'secure': False}),
             (r'^/register/(.*)/(.*)/(.*)$', {'function': self.register, 'secure': False})
         ]
         self.html_dir = os.path.join('', 'html')
@@ -229,7 +231,7 @@ class HttpRouter():
         return json.dumps({'results': {'success': success}}).encode()
 
     def vote(self, gungees):
-        success = SpaceModel().vote(gungee)
+        success = SpaceModel().vote(gungees)
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 
@@ -238,8 +240,8 @@ class HttpRouter():
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 
-    def soundboard(self, id):
-        success = SpaceModel().soundboard(id)
+    def play_sound(self, id, vis):
+        success = SpaceModel().play_sound(id, vis)
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 
@@ -248,8 +250,18 @@ class HttpRouter():
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 
-    def logout(self):
+    def termmode(self, mode):
+        success = SpaceModel().termmode(mode)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def logout(self, args):
         success = SpaceModel().logout()
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def soundboard(self, args):
+        success = SpaceModel().soundboard()
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 
