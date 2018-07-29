@@ -25,15 +25,21 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.TERM_PREVOTE = 3
         self.TERM_VOTE = 4
         self.TERM_SCREEN = 5
+        self.TERM_RESULTS = 6
         self.MAIN_WARP = 0
         self.MAIN_ORBIT = 1
         self.MAIN_COMMS = 2
         self.MAIN_JARVIS = 3
+        self.MAIN_RESULTS = 4
+        self.MAIN_PREVOTE = 5
+        self.MAIN_VOTE = 6
         self.current_priv = 0
         self.current_name = ""
         self.max_votes = 0
         self.vote_mode = 0
         self.mainscreen_mode = 0
+        self.published_results = []
+        self.max_result = 0
         self.sound_id = -1
         self.sound_actor = -1
         self.terminal_mode = 0
@@ -45,9 +51,13 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         cursor.execute('''
             SELECT g.GungeeId, g.GungeeName, g.GungeeURL
             FROM Gungee AS g
+            ORDER BY g.GungeeName ASC
         ''')
         self.gungee_data = list(cursor.fetchall())
-        print(self.gungee_data)
+
+        for g in self.gungee_data:
+            self.published_results.append([g[1], 0])
+
         db.close()
         return
 
@@ -62,7 +72,10 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         return {
             "mode": self.mainscreen_mode,
             "sound_id": self.sound_id,
-            "actor": self.sound_actor
+            "actor": self.sound_actor,
+            "results": self.published_results,
+            "max_result": self.max_result,
+            "voter": self.current_name
         }
 
     def pollTerminal(self):
@@ -97,6 +110,7 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
             if self.current_priv == self.CHILD:
                 if self.terminal_mode == self.TERM_PREVOTE:
                     self.terminal_mode = self.TERM_VOTE
+                    self.mainscreen_mode = self.MAIN_VOTE
             elif self.current_priv == self.HELPER:
                 self.terminal_mode = self.TERM_ADMIN
             else:
@@ -115,6 +129,7 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.vote_mode = int(mode)
         if self.vote_mode == 1:
             self.terminal_mode = self.TERM_PREVOTE
+            self.mainscreen_mode = self.MAIN_PREVOTE
         return True
 
     def vote(self, gungees):
@@ -133,6 +148,7 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
                 db.close()
                 print("Vote cast")
                 self.terminal_mode = self.TERM_PREVOTE
+                self.mainscreen_mode = self.MAIN_PREVOTE
             else:
                 print("Only children can vote!")
         else:
@@ -190,7 +206,62 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.sound_actor = vis
         return True
 
-
+    def reveal_result(self, place):
+        if place == 0: 
+            # Set all visible results to 0 (start of reveal phase)
+            for gungee in self.published_results:
+                gungee[1] = 0
+            db, cursor = self.db_connect()
+            cursor.execute('''
+                SELECT Count(v.VoteId) AS Votes, g.GungeeName
+                FROM Vote AS v INNER JOIN Gungee AS g ON g.GungeeId = v.GungeeId
+                GROUP BY g.GungeeId
+                ORDER BY Votes DESC, g.GungeeName ASC
+            ''')
+            results = cursor.fetchall()
+            self.max_result = results[0][0]
+            db.close()
+        elif place == -1:
+            # Reveal gunge points of people in first and second place at the same time
+            db, cursor = self.db_connect()
+            cursor.execute('''
+                SELECT Count(v.VoteId) AS Votes, g.GungeeName
+                FROM Vote AS v INNER JOIN Gungee AS g ON g.GungeeId = v.GungeeId
+                GROUP BY g.GungeeId
+                ORDER BY Votes DESC, g.GungeeName ASC
+            ''')
+            results = cursor.fetchall()
+            self.max_result = results[0][0]
+            result1 = results[0]
+            result2 = results[1]
+            names = [i[0] for i in self.published_results]
+            self.published_results[names.index(result1[1])][1] = result1[0]
+            self.published_results[names.index(result2[1])][1] = result2[0]
+            print(self.published_results)
+            db.close()
+        else:
+            # Reveal gunge points of person in (place)th place
+            db, cursor = self.db_connect()
+            cursor.execute('''
+                SELECT Count(v.VoteId) AS Votes, g.GungeeName
+                FROM Vote AS v INNER JOIN Gungee AS g ON g.GungeeId = v.GungeeId
+                GROUP BY g.GungeeId
+                ORDER BY Votes DESC, g.GungeeName ASC
+            ''')
+            results = cursor.fetchall()
+            self.max_result = results[0][0]
+            db.close()
+            if (place <= len(self.published_results)):
+                result = results[place-1]
+                names = [i[0] for i in self.published_results]
+                print(self.published_results)
+                print(result[1])
+                print(names.index(result[1]))
+                self.published_results[names.index(result[1])][1] = result[0]
+                print(self.published_results)
+        self.mainscreen_mode = self.MAIN_RESULTS
+        self.terminal_mode = self.TERM_RESULTS
+        return True
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

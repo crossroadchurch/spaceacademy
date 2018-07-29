@@ -2,15 +2,43 @@
     "sounds": [
         {
             "filename": "files/assets/one.wav",
-            "caption": "This is file one"
+            "caption": "This is file one",
+            "actor": 0
         },
         {
             "filename": "files/assets/two.wav",
-            "caption": "This is file two"
+            "caption": "This is file two",
+            "actor": 1
+        },
+        {
+            "filename": "files/assets/one.wav",
+            "caption": "This is file one",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/two.wav",
+            "caption": "This is file two",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/one.wav",
+            "caption": "This is file one",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/two.wav",
+            "caption": "This is file two",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/one.wav",
+            "caption": "This is file one",
+            "actor": 0
         },
         {
             "filename": "files/assets/three.wav",
-            "caption": "This is file three"
+            "caption": "This is file three",
+            "actor": 0
         }
     ]
 }

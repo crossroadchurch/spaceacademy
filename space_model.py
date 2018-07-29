@@ -38,6 +38,9 @@ class SpaceModel(object):
     def play_sound(self, id, vis):
         return self.controller.play_sound(id, vis)
 
+    def reveal_result(self, place):
+        return self.controller.reveal_result(place)
+
     def mainscreen(self, mode):
         return self.controller.mainscreen(mode)
 

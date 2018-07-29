@@ -6,29 +6,38 @@ var jarvisSounds;
 var warpUp, warpDown;
 var curSoundId;
 var curSound;
+var curActor=-1;
 var fft;
 var tick, subtick, slice;
 var slices = [];
+var planets = [];
+var gunge_results = [];
+var displayed_results = [];
+var max_gunge_result = 0;
+var voter = "";
 var mask;
 var tileH = 300;
 var transMax = 200;
 var transCur = 200;
 var transStep = 1;
 var maxWarp = 12;
-const MAIN_WARP = 0
-const MAIN_ORBIT = 1
-const MAIN_COMMS = 2
-const MAIN_JARVIS = 3
+const MAIN_WARP = 0;
+const MAIN_ORBIT = 1;
+const MAIN_COMMS = 2;
+const MAIN_JARVIS = 3;
+const MAIN_RESULTS = 4;
+const MAIN_PREVOTE = 5;
+const MAIN_VOTE = 6;
+const ACTOR_JARVIS = 0;
+const ACTOR_MISSION = 1;
 
 function preload() {
   myFont = loadFont('files/assets/FINALOLD.TTF');
   jarvisJSON = loadJSON('files/assets/jarvis.json', loadJarvisSounds);
+  planetJSON = loadJSON('files/assets/planets.json', loadPlanets);
   warpUp = loadSound('files/assets/warp-up.mp3');
   warpDown = loadSound('files/assets/warp-down.wav');
   mask = loadImage('files/assets/planet_mask.png');
-  slices.push(loadImage('files/assets/earthslice0.jpg'));  
-  slices.push(loadImage('files/assets/earthslice1.jpg'));
-  slices.push(loadImage('files/assets/earthslice2.jpg'));
   slices.push(loadImage('files/assets/earthslice3.jpg'));
   slices.push(loadImage('files/assets/earthslice4.jpg'));
   slices.push(loadImage('files/assets/earthslice5.jpg'));
@@ -47,13 +56,28 @@ function preload() {
   slices.push(loadImage('files/assets/earthslice18.jpg'));
   slices.push(loadImage('files/assets/earthslice19.jpg'));
   slices.push(loadImage('files/assets/earthslice0.jpg'));  
+  slices.push(loadImage('files/assets/earthslice1.jpg'));
+  slices.push(loadImage('files/assets/earthslice2.jpg'));
+  slices.push(loadImage('files/assets/earthslice3.jpg'));
+}
+
+function loadPlanets(data) {
+  planets = new Array(data.planets.length);
+  for(var i=0; i<data.planets.length; i++){
+    planets[i] = new Array();
+    for(var j=0; j<20; j++){
+      planets[i].push(loadImage(data.planets[i].basefilename + str(j) + data.planets[i].extension));
+    }
+  }
 }
 
 function loadJarvisSounds(data) {
   jarvisSounds = new Array(data.sounds.length);
   for(var i=0; i<data.sounds.length; i++){
-    console.log(data.sounds[i].filename);
     jarvisSounds[i] = loadSound(data.sounds[i].filename);
+    jarvisSounds[i].onended(function(){
+      $.getJSON('play_sound/-1/' + data.sounds[i].actor);
+    });
   }
 }
 
@@ -166,63 +190,183 @@ function draw() {
       break;
 
     case MAIN_JARVIS:
-      angleMode(DEGREES);
+      if (curActor == ACTOR_JARVIS){
+        angleMode(DEGREES);
+        colorMode(HSB);
+        background(0);
+        var spectrum = fft.analyze();
+        var prop = 0.4;
+        noStroke();
+        push();
+        translate(width / 2, height / 2);
+        maxSpec = Math.floor(prop*spectrum.length);
+        for (var i=0; i< maxSpec; i++){ // Only look at human voice area of spectrum
+          var angle = map(i, 0, maxSpec, 0, 1080);
+          var col1 = map(i, 0, maxSpec, 0, 127);
+          var amp = spectrum[i];
+          var a = map(amp, 0, 256, 0, 0.3*width);
+          var b = map(amp, 0, 256, 0, 0.4*height);
+          var x = a * cos(angle);
+          var y = b * sin(angle);
+          stroke(col1 , 255, 255);
+          line(0, 0, x, y);
+        }
+        for (var i=maxSpec-1; i>=0; i--){ // Only look at human voice area of spectrum
+          var angle = map(i, 0, maxSpec, 1080, 0);
+          var col2 = map(i, 0, maxSpec, 128, 255);
+          var amp = spectrum[i];
+          var a = map(amp, 0, 256, 0, 0.3*width);
+          var b = map(amp, 0, 256, 0, 0.4*height);
+          var x = a * cos(angle);
+          var y = b * sin(angle);
+          stroke(col2, 255, 255);
+          line(0, 0, x, y);
+        }
+        pop();
+        colorMode(RGB);
+        fill(252,168,92);
+        ellipse(5*unitSize, unitSize, unitSize, unitSize);
+        rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+        ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+        rect(12*unitSize, (0.5*unitSize), width-17*unitSize, unitSize);
+        fill(186,218,255);
+        textFont(myFont);
+        textSize(unitSize);
+        text('MAIN COMPUTER', 6.5*unitSize, 1.35*unitSize);
+        
+      } else if (curActor == ACTOR_MISSION){
+        background(0);
+        noStroke();
+        textFont(myFont)
+        textSize(1.8*unitSize);
+        fill(186,218,255);
+        textAlign(CENTER, CENTER);
+        text("MESSAGE FROM MISSION CONTROL", width/2, height/2);
+        textSize(unitSize);
+        today = new Date();
+        stardate = (floor(today.getTime()/1000)/10000).toFixed(4);
+        text('STARDATE ' + stardate, width/2, 2*unitSize + (height/2));
+        textAlign(LEFT, BASELINE);
+        fill(252,168,92);
+        ellipse(5*unitSize, unitSize, unitSize, unitSize);
+        rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+        ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+        rect(13*unitSize, (0.5*unitSize), width-18*unitSize, unitSize);
+        fill(186,218,255);
+        textFont(myFont);
+        textSize(unitSize);
+        text('INCOMING MESSAGE', 6.5*unitSize, 1.35*unitSize);
+      }
+      break;
+
+    case MAIN_RESULTS:
       background(0);
-      var spectrum = fft.analyze();
-      var prop = 0.4;
+      textAlign(LEFT, CENTER);
+      textFont(myFont);
+      textSize(unitSize);
       noStroke();
-      translate(width / 2, height / 2);
-      maxSpec = Math.floor(prop*spectrum.length);
-      for (var i=0; i< maxSpec; i++){ // Only look at human voice area of spectrum
-        var angle = map(i, 0, maxSpec, 0, 1080);
-        var col1 = map(i, 0, maxSpec, 0, 127);
-        var amp = spectrum[i];
-        var a = map(amp, 0, 256, 0, 0.45*width);
-        var b = map(amp, 0, 256, 0, 0.45*height);
-        var x = a * cos(angle);
-        var y = b * sin(angle);
-        stroke(col1 , 255, 255);
-        line(0, 0, x, y);
+      for (var i=0; i<gunge_results.length; i++){
+        fill(186,218,255);
+        text(gunge_results[i][0], width*0.15, height * (i+1.25)/(gunge_results.length+1));
+        textAlign(RIGHT, CENTER);
+        if (gunge_results[i][1] == 0){
+          text("0", width*0.85, height * (i+1.25)/(gunge_results.length+1));
+        } else {
+          if (displayed_results[i][1] < gunge_results[i][1]){
+            displayed_results[i][1] = displayed_results[i][1] + (0.004*max_gunge_result);
+          }
+          text(str(floor(displayed_results[i][1])), width*0.85, height * (i+1.25)/(gunge_results.length+1));
+          fill(252,168,92);
+          rect(width*0.3, height * (i+1)/(gunge_results.length+1), width*0.5*displayed_results[i][1]/max_gunge_result, height*0.1);
+        }
+        textAlign(LEFT, CENTER);
       }
-      for (var i=maxSpec-1; i>=0; i--){ // Only look at human voice area of spectrum
-        var angle = map(i, 0, maxSpec, 1080, 0);
-        var col2 = map(i, 0, maxSpec, 128, 255);
-        var amp = spectrum[i];
-        var a = map(amp, 0, 256, 0, 0.45*width);
-        var b = map(amp, 0, 256, 0, 0.45*height);
-        var x = a * cos(angle);
-        var y = b * sin(angle);
-        stroke(col2, 255, 255);
-        line(0, 0, x, y);
-      }
+      textAlign(LEFT, BASELINE);
+      fill(252,168,92);
+      ellipse(5*unitSize, unitSize, unitSize, unitSize);
+      rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+      ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+      rect(11.75*unitSize, (0.5*unitSize), width-16.75*unitSize, unitSize);
+      fill(186,218,255);
+      textFont(myFont);
+      textSize(unitSize);
+      text('GUNGE RESULTS', 6.5*unitSize, 1.35*unitSize);
+      break;
+
+    case MAIN_PREVOTE:
+      background(0);
+      noStroke();
+      textFont(myFont)
+      textSize(3*unitSize);
+      fill(186,218,255);
+      textAlign(CENTER, CENTER);
+      text('READY FOR VOTING...', width/2, height/2);
+      textAlign(LEFT, BASELINE);
+      fill(252,168,92);
+      ellipse(5*unitSize, unitSize, unitSize, unitSize);
+      rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+      ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+      rect(11.25*unitSize, (0.5*unitSize), width-16.25*unitSize, unitSize);
+      fill(186,218,255);
+      textFont(myFont);
+      textSize(unitSize);
+      text('GUNGE VOTES', 6.5*unitSize, 1.35*unitSize);
+      break;  
+    
+    case MAIN_VOTE:
+      background(0);
+      noStroke();
+      textFont(myFont);
+      textSize(3*unitSize);
+      fill(186,218,255);
+      textAlign(CENTER, CENTER);
+      text(voter.toUpperCase() + " IS VOTING...", width/2, height/2);
+      textSize(2*unitSize);
+      text('WHO WILL THEY CHOOSE?', width/2, 2*unitSize + (height/2));
+      textAlign(LEFT, BASELINE);
+      fill(252,168,92);
+      ellipse(5*unitSize, unitSize, unitSize, unitSize);
+      rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+      ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+      rect(11.25*unitSize, (0.5*unitSize), width-16.25*unitSize, unitSize);
+      fill(186,218,255);
+      textFont(myFont);
+      textSize(unitSize);
+      text('GUNGE VOTES', 6.5*unitSize, 1.35*unitSize);
+      break;  
   }
 
   // Foreground layer
   switch(mode){
     case MAIN_WARP:
       fill(252,168,92);
-      ellipse(unitSize, unitSize, unitSize, unitSize);
-      rect(unitSize,0.5*unitSize, unitSize, unitSize);
-      ellipse(width-unitSize, unitSize, unitSize, unitSize);
-      rect(7*unitSize, (0.5*unitSize), width-8*unitSize, unitSize);
+      ellipse(5*unitSize, unitSize, unitSize, unitSize);
+      rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+      ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+      rect(11*unitSize, (0.5*unitSize), width-16*unitSize, unitSize);
       fill(186,218,255);
       textFont(myFont);
       textSize(unitSize);
-      text('USS INTREPID', 2.5*unitSize, 1.35*unitSize);
+      text('USS INTREPID', 6.5*unitSize, 1.35*unitSize);
       break;
     
     case MAIN_ORBIT:
       fill(252,168,92);
-      ellipse(unitSize, unitSize, unitSize, unitSize);
-      rect(unitSize,0.5*unitSize, unitSize, unitSize);
-      ellipse(width-unitSize, unitSize, unitSize, unitSize);
-      rect(7*unitSize, (0.5*unitSize), width-8*unitSize, unitSize);
+      ellipse(5*unitSize, unitSize, unitSize, unitSize);
+      rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+      ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+      rect(11*unitSize, (0.5*unitSize), width-16*unitSize, unitSize);
       fill(186,218,255);
       textFont(myFont);
       textSize(unitSize);
-      text('USS INTREPID', 2.5*unitSize, 1.35*unitSize);
+      text('USS INTREPID', 6.5*unitSize, 1.35*unitSize);
       break;
   }
+
+  // 4:3 ASPECT RATIO BOX
+  //  noFill();
+  //  stroke(255,0,0);
+  //  rect(width/16*2,0,width/16*12, height);
 
 }
 
@@ -231,25 +375,46 @@ function pollDisplay(){
     "/pollDisplay",
     function (data, status){
       if (mode != data.mode){
-        mode = data.mode;
-        switch(mode){
+        switch(data.mode){
           case MAIN_JARVIS:
             curSound = -1;
             break;
           case MAIN_WARP:
-            warpUp.play();
+            if (mode == MAIN_ORBIT){
+              warpUp.play();
+            }
             break;
           case MAIN_ORBIT:
-            warpDown.play();
+            if (mode == MAIN_WARP){
+              warpDown.play();
+            }
             break;
+          case MAIN_RESULTS:
+            gunge_results = data.results;
+            max_gunge_result = data.max_result;
+            displayed_results = data.results;
+            max_gunge_result = 0;
+            for (var i=0; i<displayed_results.length; i++){
+              displayed_results[i][1] = 0;
+            }
+            break;
+          case MAIN_VOTE:
+            voter = data.voter;
         }
+        mode = data.mode;
       }
       if (mode == MAIN_JARVIS){
         if (data.sound_id != curSoundId){
           curSoundId = data.sound_id;
-          console.log(curSoundId);
-          jarvisSounds[curSoundId].play()
+          curActor = data.actor;
+          if (curSoundId != -1){
+            jarvisSounds[curSoundId].play();
+          }
         }
+      }
+      if (mode == MAIN_RESULTS){
+        gunge_results = data.results;
+        max_gunge_result = data.max_result;
       }
     }
   );

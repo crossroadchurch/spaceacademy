@@ -75,7 +75,9 @@ class HttpRouter():
             (r'^/vote/(.*)$', {'function': self.vote, 'secure': False}),
             (r'^/vote_config/(.*)/(.*)$', {'function': self.vote_config, 'secure': False}),
             (r'^/play_sound/(.*)/(.*)$', {'function': self.play_sound, 'secure': False}),
+            (r'^/reveal_result/(.*)$', {'function': self.reveal_result, 'secure': False}),
             (r'^/mainscreen/(.*)$', {'function': self.mainscreen, 'secure': False}),
+            (r'^/destination/(.*)$', {'function': self.set_destination, 'secure': False}),
             (r'^/termmode/(.*)$', {'function': self.termmode, 'secure': False}),
             (r'^/register/(.*)/(.*)/(.*)$', {'function': self.register, 'secure': False})
         ]
@@ -245,8 +247,18 @@ class HttpRouter():
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 
+    def reveal_result(self, place):
+        success = SpaceModel().reveal_result(int(place))
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
     def mainscreen(self, mode):
         success = SpaceModel().mainscreen(mode)
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def set_destination(self, destination):
+        success = SpaceModel().set_destination(destination)
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 

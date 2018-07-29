@@ -1,0 +1,14 @@
+{
+    "planets": [
+        {
+            "basefilename": "files/assets/mars/mars_slice",
+            "extension": ".jpg",
+            "location": "Mars"
+        },
+        {
+            "basefilename": "files/assets/mercury/mercury_slice",
+            "extension": ".jpg",
+            "location": "Mercury"
+        }
+    ]
+}

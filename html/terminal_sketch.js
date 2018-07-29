@@ -14,6 +14,7 @@ const TERM_SOUND = 2;
 const TERM_PREVOTE = 3;
 const TERM_VOTE = 4;
 const TERM_SCREEN = 5;
+const TERM_RESULTS = 6;
 
 
 function preload() {
@@ -55,8 +56,9 @@ function sounds(){
   $.getJSON('/soundboard/');
 }
 
-function play(id){
-  $.getJSON('/play_sound/' + id + "/0");
+function play(id, actor){
+  console.log(actor);
+  $.getJSON('/play_sound/' + id + "/" + actor);
 }
 
 function prevote(){
@@ -93,6 +95,21 @@ function vote(choice){
     }
   }
 }
+
+function results(){
+  $.getJSON('/reveal_result/0',
+    function(data, success){
+      beep();
+    });
+}
+
+function reveal(choice){
+    $.getJSON('/reveal_result/' + choice,
+      function(data, success){
+        beep();
+      });
+}
+
 
 function logout(){
   $.getJSON('/logout/',
@@ -203,6 +220,7 @@ function draw() {
       text('BEGIN VOTE', 6*gridX, 5.5*gridY);
       text('SOUNDS', 1.5*gridX, 5.5*gridY);
       text('DISPLAY', 1.5*gridX, 11.5*gridY);
+      text('RESULTS', 6*gridX, 8.5*gridY);
       text('LOGOUT', 6*gridX, 11.5*gridY);
       // Max gunge votes
       fill(186,218,255);
@@ -213,7 +231,16 @@ function draw() {
     case TERM_SOUND:
       for(var i=0; i<areas.length; i++){
         areas[i].show();
-      }    
+      }
+      // Text for sounds
+      fill(0);
+      textFont(myFont);
+      textSize(0.5*gridY);
+      text("BACK TO ADMIN", 1.5*gridX, 2.5*gridY);
+      text("DISPLAY WARP", 6*gridX, 2.5*gridY);
+      for (var j=0; j<jarvis_data.sounds.length; j++){
+        text(jarvis_data.sounds[j].caption.toUpperCase(), 1.5*gridX, (1.35*(j+1)+2.9)*gridY);
+      }
       break;
     case TERM_PREVOTE:
       // Footer
@@ -283,6 +310,29 @@ function draw() {
       text('COMMAND', 1.5*gridX, 11.5*gridY);
       text('BACK TO ADMIN', 6*gridX, 11.5*gridY);
       break;
+    case TERM_RESULTS:
+      fill(252,168,92);
+      ellipse(gridX, height-gridY, gridX, gridY);
+      rect(gridX, height-1.5*gridY, 0.5*gridX, gridY);
+      ellipse(width-gridX, height-gridY, gridX, gridY);
+      rect(5.4*gridX, height-1.5*gridY, 3.6*gridX, gridY);
+      fill(186,218,255);
+      textFont(myFont);
+      textSize(gridY*0.70);
+      text('GUNGE RESULTS', 1.75*gridX, height-0.75*gridY);
+      for(var i=0; i<areas.length; i++){
+        areas[i].show();
+      }
+      fill(0);
+      textFont(myFont);
+      textSize(gridY*0.5);
+      text('4TH PLACE', 1.5*gridX, 3.5*gridY);
+      text('3RD PLACE', 6*gridX, 3.5*gridY);
+      text('2ND PLACE', 1.5*gridX, 7.5*gridY);
+      text('1ST PLACE', 6*gridX, 7.5*gridY);
+      text('BOTH TOP 2', 1.5*gridX, 11.5*gridY);
+      text('BACK TO ADMIN', 6*gridX, 11.5*gridY);
+      break;
   }
 }
 
@@ -310,12 +360,15 @@ function pollTerminal(){
             areas.push(new Area(8*gridX, gridY, gridX, 2*gridY, color(252,168,92), "voteup"));
             areas.push(new Area(5.5*gridX, 3.5*gridY, 3.5*gridX, 2.5*gridY, color(252,252,124), "prevote"));
             areas.push(new Area(gridX, 7*gridY, 3.5*gridX, 5*gridY, color(188,252,184), "display"));
-            areas.push(new Area(5.5*gridX, 7*gridY, 3.5*gridX, 5*gridY, color(186,218,255), "logout"));
+            areas.push(new Area(5.5*gridX, 7*gridY, 3.5*gridX, 2*gridY, color(252,168,92), "results"));
+            areas.push(new Area(5.5*gridX, 10*gridY, 3.5*gridX, 2*gridY, color(186,218,255), "logout"));
             break;
           case TERM_SOUND:
             areas = [];
+            areas.push(new Area(gridX, gridY, 3.5*gridX, 1.8*gridY, color(188,252,184), "admin"));
+            areas.push(new Area(5.5*gridX, gridY, 3.5*gridX, 1.8*gridY, color(186,218,255), "warp"));
             for (var i=0; i<jarvis_data.sounds.length; i++){
-              areas.push(new Area(gridX, gridY*(i+1), width-2*gridX, 0.8*gridY, color(252,168,92), "play("+i+")"));
+              areas.push(new Area(gridX, gridY*(1.35*i+3.5), width-2*gridX, 1.1*gridY, color(252,168,92), "play("+i+"," + jarvis_data.sounds[i].actor +")"));
             }
             break;
           case TERM_PREVOTE:
@@ -338,6 +391,15 @@ function pollTerminal(){
             areas.push(new Area(5.5*gridX, gridY, 3.5*gridX, 5*gridY, color(186,218,255), "orbit"));
             areas.push(new Area(gridX, 7*gridY, 3.5*gridX, 5*gridY, color(188,252,184), "command"));
             areas.push(new Area(5.5*gridX, 7*gridY, 3.5*gridX, 5*gridY, color(240,218,255), "admin"));
+            break;
+          case TERM_RESULTS:
+            areas = [];
+            areas.push(new Area(gridX, gridY, 3.5*gridX, 3*gridY, color(186,218,255), "reveal(4)"));
+            areas.push(new Area(5.5*gridX, gridY, 3.5*gridX, 3*gridY, color(252,252,124), "reveal(3)"));
+            areas.push(new Area(gridX, 5*gridY, 3.5*gridX, 3*gridY, color(240,218,255), "reveal(2)"));
+            areas.push(new Area(5.5*gridX, 5*gridY, 3.5*gridX, 3*gridY, color(188,252,184), "reveal(1)"));
+            areas.push(new Area(gridX, 9*gridY, 3.5*gridX, 3*gridY, color(186,218,255), "reveal(-1)"));
+            areas.push(new Area(5.5*gridX, 9*gridY, 3.5*gridX, 3*gridY, color(252,252,124), "admin"));
             break;
         }
       }
