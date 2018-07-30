@@ -12,7 +12,7 @@ def crop(image_path, coords, saved_location):
 
 if __name__ == '__main__':
 
-    image = 'saturn/saturn_full.jpg'
+    image = 'html/assets/venus/venus_surface_full.jpg'
     for i in range(20):
         print(i)
-        crop(image, (0, 200*i, 2000, 200*(i+1)), 'saturn/saturn_slice'+str(i)+'.jpg')
+        crop(image, (0, 200*(19-i), 2000, 200*(20-i)), 'html/assets/venus/venus_surface_slice'+str(i)+'.jpg')

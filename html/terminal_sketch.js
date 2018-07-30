@@ -3,6 +3,8 @@ var mode;
 var myFont;
 var beeps;
 var areas;
+var planet_data;
+var destination;
 var gungee_data;
 var jarvis_data;
 var vote_string;
@@ -25,11 +27,13 @@ function preload() {
   beeps.push(loadSound('files/assets/beep3.wav'));
   beeps.push(loadSound('files/assets/beep4.wav'));
   jarvis_data = loadJSON('files/assets/jarvis.json');
+  planet_data = loadJSON('files/assets/planets.json');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   mode = -1;
+  destination = 0;
   gridX = width / 10;
   gridY = height / 15;
   areas = [];
@@ -139,11 +143,9 @@ function orbit(){
   });
 }
 
-function space_command(){
-  $.getJSON('/mainscreen/2',
-  function(data, status){
-    beep();
-  });
+function planet(){
+  destination = (destination + 1) % planet_data.planets.length;
+  $.getJSON('/destination/' + destination);
 }
 
 function admin(){
@@ -307,8 +309,10 @@ function draw() {
       textSize(gridY*0.5);
       text('WARP', 1.5*gridX, 5.5*gridY);
       text('ORBIT', 6*gridX, 5.5*gridY);
-      text('COMMAND', 1.5*gridX, 11.5*gridY);
+      text('DESTINATION', 1.5*gridX, 11.5*gridY);
       text('BACK TO ADMIN', 6*gridX, 11.5*gridY);
+      textSize(gridY);
+      text(planet_data.planets[destination].location.toUpperCase(), 1.5*gridX, 10.5*gridY);
       break;
     case TERM_RESULTS:
       fill(252,168,92);
@@ -389,7 +393,7 @@ function pollTerminal(){
             areas = [];
             areas.push(new Area(gridX, gridY, 3.5*gridX, 5*gridY, color(252,252,124), "warp"));
             areas.push(new Area(5.5*gridX, gridY, 3.5*gridX, 5*gridY, color(186,218,255), "orbit"));
-            areas.push(new Area(gridX, 7*gridY, 3.5*gridX, 5*gridY, color(188,252,184), "command"));
+            areas.push(new Area(gridX, 7*gridY, 3.5*gridX, 5*gridY, color(188,252,184), "planet"));
             areas.push(new Area(5.5*gridX, 7*gridY, 3.5*gridX, 5*gridY, color(240,218,255), "admin"));
             break;
           case TERM_RESULTS:

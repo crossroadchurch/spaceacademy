@@ -40,6 +40,8 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.mainscreen_mode = 0
         self.published_results = []
         self.max_result = 0
+        self.current_planet = 0
+        self.next_planet = 0
         self.sound_id = -1
         self.sound_actor = -1
         self.terminal_mode = 0
@@ -75,7 +77,8 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
             "actor": self.sound_actor,
             "results": self.published_results,
             "max_result": self.max_result,
-            "voter": self.current_name
+            "voter": self.current_name,
+            "planet": self.current_planet
         }
 
     def pollTerminal(self):
@@ -188,11 +191,19 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
     def mainscreen(self, mode):
         if self.mainscreen_mode != int(mode):
             self.mainscreen_mode = int(mode)
+            if self.mainscreen_mode == self.MAIN_ORBIT:
+                # Change planet model as we start to come out of warp
+                print(self.next_planet)
+                self.current_planet = self.next_planet
         return True
 
     def termmode(self, mode):
         if self.terminal_mode != int(mode):
             self.terminal_mode = int(mode)
+        return True
+
+    def set_destination(self, destination):
+        self.next_planet = destination
         return True
 
     def soundboard(self):

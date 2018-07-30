@@ -7,6 +7,7 @@ var warpUp, warpDown;
 var curSoundId;
 var curSound;
 var curActor=-1;
+var curPlanet=0;
 var fft;
 var tick, subtick, slice;
 var slices = [];
@@ -38,27 +39,6 @@ function preload() {
   warpUp = loadSound('files/assets/warp-up.mp3');
   warpDown = loadSound('files/assets/warp-down.wav');
   mask = loadImage('files/assets/planet_mask.png');
-  slices.push(loadImage('files/assets/earthslice3.jpg'));
-  slices.push(loadImage('files/assets/earthslice4.jpg'));
-  slices.push(loadImage('files/assets/earthslice5.jpg'));
-  slices.push(loadImage('files/assets/earthslice6.jpg'));
-  slices.push(loadImage('files/assets/earthslice7.jpg'));
-  slices.push(loadImage('files/assets/earthslice8.jpg'));
-  slices.push(loadImage('files/assets/earthslice9.jpg'));
-  slices.push(loadImage('files/assets/earthslice10.jpg'));  
-  slices.push(loadImage('files/assets/earthslice11.jpg'));
-  slices.push(loadImage('files/assets/earthslice12.jpg'));
-  slices.push(loadImage('files/assets/earthslice13.jpg'));
-  slices.push(loadImage('files/assets/earthslice14.jpg'));
-  slices.push(loadImage('files/assets/earthslice15.jpg'));
-  slices.push(loadImage('files/assets/earthslice16.jpg'));
-  slices.push(loadImage('files/assets/earthslice17.jpg'));
-  slices.push(loadImage('files/assets/earthslice18.jpg'));
-  slices.push(loadImage('files/assets/earthslice19.jpg'));
-  slices.push(loadImage('files/assets/earthslice0.jpg'));  
-  slices.push(loadImage('files/assets/earthslice1.jpg'));
-  slices.push(loadImage('files/assets/earthslice2.jpg'));
-  slices.push(loadImage('files/assets/earthslice3.jpg'));
 }
 
 function loadPlanets(data) {
@@ -68,6 +48,7 @@ function loadPlanets(data) {
     for(var j=0; j<20; j++){
       planets[i].push(loadImage(data.planets[i].basefilename + str(j) + data.planets[i].extension));
     }
+    planets[i].push(loadImage(data.planets[i].basefilename + "0" + data.planets[i].extension));
   }
 }
 
@@ -110,8 +91,10 @@ function draw() {
       noStroke();
       if (transCur < transMax){
         // MOVING FROM ORBIT TO WARP
-        image(slices[slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
-        image(slices[slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
+        // image(slices[slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
+        // image(slices[slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
         image(mask, 0, transCur, width, height);
         push();
         translate(width/2, height/2);
@@ -142,8 +125,10 @@ function draw() {
       noStroke();
       if (transCur > 0){
         // MOVING FROM WARP TO ORBIT
-        image(slices[slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
-        image(slices[slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
+        // image(slices[slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
+        // image(slices[slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
         image(mask, 0, transCur, width, height);
         
         push();
@@ -170,8 +155,10 @@ function draw() {
 
       } else {
         // IN ORBIT, NOT IN WARP TRANSITION
-        image(slices[slice+1], width/2 - 5*tileH, subtick+height-2*tileH, 10*tileH, tileH);
-        image(slices[slice], width/2 - 5*tileH, subtick+height-tileH, 10*tileH, tileH);
+        // image(slices[slice+1], width/2 - 5*tileH, subtick+height-2*tileH, 10*tileH, tileH);
+        // image(slices[slice], width/2 - 5*tileH, subtick+height-tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice+1], width/2 - 5*tileH, subtick+height-2*tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice], width/2 - 5*tileH, subtick+height-tileH, 10*tileH, tileH);
         image(mask, 0, 0, width, height);
         
         push();
@@ -388,6 +375,7 @@ function pollDisplay(){
             if (mode == MAIN_WARP){
               warpDown.play();
             }
+            curPlanet = data.planet;
             break;
           case MAIN_RESULTS:
             gunge_results = data.results;

@@ -44,6 +44,9 @@ class SpaceModel(object):
     def mainscreen(self, mode):
         return self.controller.mainscreen(mode)
 
+    def set_destination(self, destination):
+        return self.controller.set_destination(destination)
+
     def termmode(self, mode):
         return self.controller.termmode(mode)
 

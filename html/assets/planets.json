@@ -1,14 +1,44 @@
 {
     "planets": [
         {
+            "basefilename": "files/assets/earth/earthslice",
+            "extension": ".jpg",
+            "location": "Earth"
+        },
+        {
             "basefilename": "files/assets/mars/mars_slice",
             "extension": ".jpg",
             "location": "Mars"
         },
         {
+            "basefilename": "files/assets/jupiter/jupiterslice",
+            "extension": ".jpg",
+            "location": "Jupiter"
+        },
+        {
+            "basefilename": "files/assets/saturn/saturn_slice",
+            "extension": ".jpg",
+            "location": "Saturn"
+        },
+        {
+            "basefilename": "files/assets/sun/sun_slice",
+            "extension": ".jpg",
+            "location": "Sun"
+        },
+        {
             "basefilename": "files/assets/mercury/mercury_slice",
             "extension": ".jpg",
             "location": "Mercury"
+        },
+        {
+            "basefilename": "files/assets/venus/venus_clouds_slice",
+            "extension": ".jpg",
+            "location": "Venus C"
+        },
+        {
+            "basefilename": "files/assets/venus/venus_surface_slice",
+            "extension": ".jpg",
+            "location": "Venus S"
         }
     ]
 }
