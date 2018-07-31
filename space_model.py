@@ -53,6 +53,9 @@ class SpaceModel(object):
     def logout(self):
         return self.controller.logout()
 
+    def stats(self):
+        return self.controller.stats()
+
     def soundboard(self):
         return self.controller.soundboard()
 

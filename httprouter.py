@@ -71,6 +71,7 @@ class HttpRouter():
             (r'^/pollTerminal$', {'function': self.pollTerminal, 'secure': False}),
             (r'^/login/(.*)$', {'function': self.login, 'secure': False}),
             (r'^/logout/(.*)$', {'function': self.logout, 'secure': False}),
+            (r'^/stats/(.*)$', {'function': self.stats, 'secure': False}),
             (r'^/soundboard/(.*)$', {'function': self.soundboard, 'secure': False}),
             (r'^/vote/(.*)$', {'function': self.vote, 'secure': False}),
             (r'^/vote_config/(.*)/(.*)$', {'function': self.vote_config, 'secure': False}),
@@ -269,6 +270,11 @@ class HttpRouter():
 
     def logout(self, args):
         success = SpaceModel().logout()
+        self.do_json_header()
+        return json.dumps({'results': {'success': success}}).encode()
+
+    def stats(self, args):
+        success = SpaceModel().stats()
         self.do_json_header()
         return json.dumps({'results': {'success': success}}).encode()
 

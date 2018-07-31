@@ -14,6 +14,11 @@ var slices = [];
 var planets = [];
 var gunge_results = [];
 var displayed_results = [];
+var full_results = [];
+var vote_history = [];
+var gungee_colors = [];
+var gungee_names = [];
+var history_count = 0;
 var max_gunge_result = 0;
 var voter = "";
 var mask;
@@ -29,6 +34,7 @@ const MAIN_JARVIS = 3;
 const MAIN_RESULTS = 4;
 const MAIN_PREVOTE = 5;
 const MAIN_VOTE = 6;
+const MAIN_STATS = 7;
 const ACTOR_JARVIS = 0;
 const ACTOR_MISSION = 1;
 
@@ -75,11 +81,33 @@ function setup() {
   tick = 0;
   subtick = 0;
   slice = 0;
+  gungee_colors.push(color(255,0,0));
+  gungee_colors.push(color(0,255,0));
+  gungee_colors.push(color(0,255,255));
+  gungee_colors.push(color(0,0,255));
 }
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   unitSize = height / 15;
+}
+
+function processFullResults(){
+  vote_history = [];
+  for (var i=0; i<4; i++){
+    vote_history.push([0]);
+  }
+  for (var j=1; j<=full_results.length; j++){
+    gungee = (full_results[j-1])-1;
+    for (var g=0; g<4; g++){
+      prev_val = vote_history[g][j-1];
+      if (g==gungee){
+        vote_history[g].push(prev_val+1);
+      } else {
+        vote_history[g].push(prev_val);
+      }
+    }
+  }
 }
 
 function draw() {
@@ -91,8 +119,6 @@ function draw() {
       noStroke();
       if (transCur < transMax){
         // MOVING FROM ORBIT TO WARP
-        // image(slices[slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
-        // image(slices[slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
         image(planets[curPlanet][slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
         image(planets[curPlanet][slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
         image(mask, 0, transCur, width, height);
@@ -125,10 +151,11 @@ function draw() {
       noStroke();
       if (transCur > 0){
         // MOVING FROM WARP TO ORBIT
-        // image(slices[slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
-        // image(slices[slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
-        image(planets[curPlanet][slice+1], width/2 - 5*tileH, transCur+subtick+height-2*tileH, 10*tileH, tileH);
-        image(planets[curPlanet][slice], width/2 - 5*tileH, transCur+subtick+height-tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice+1], width/2 - 5*tileH, (transCur/2)+subtick+height-2*tileH, 10*tileH, tileH);
+        image(planets[curPlanet][slice], width/2 - 5*tileH, (transCur/2)+subtick+height-tileH, 10*tileH, tileH);
+        fill(0);
+        rect(0,0,width,tileH);
+        fill(255);
         image(mask, 0, transCur, width, height);
         
         push();
@@ -155,8 +182,6 @@ function draw() {
 
       } else {
         // IN ORBIT, NOT IN WARP TRANSITION
-        // image(slices[slice+1], width/2 - 5*tileH, subtick+height-2*tileH, 10*tileH, tileH);
-        // image(slices[slice], width/2 - 5*tileH, subtick+height-tileH, 10*tileH, tileH);
         image(planets[curPlanet][slice+1], width/2 - 5*tileH, subtick+height-2*tileH, 10*tileH, tileH);
         image(planets[curPlanet][slice], width/2 - 5*tileH, subtick+height-tileH, 10*tileH, tileH);
         image(mask, 0, 0, width, height);
@@ -254,17 +279,17 @@ function draw() {
       noStroke();
       for (var i=0; i<gunge_results.length; i++){
         fill(186,218,255);
-        text(gunge_results[i][0], width*0.15, height * (i+1.25)/(gunge_results.length+1));
+        text(gunge_results[i][0], width*0.2, height * (i+1.25)/(gunge_results.length+1));
         textAlign(RIGHT, CENTER);
         if (gunge_results[i][1] == 0){
-          text("0", width*0.85, height * (i+1.25)/(gunge_results.length+1));
+          text("0", width*0.8, height * (i+1.25)/(gunge_results.length+1));
         } else {
           if (displayed_results[i][1] < gunge_results[i][1]){
             displayed_results[i][1] = displayed_results[i][1] + (0.004*max_gunge_result);
           }
-          text(str(floor(displayed_results[i][1])), width*0.85, height * (i+1.25)/(gunge_results.length+1));
+          text(str(floor(displayed_results[i][1])), width*0.8, height * (i+1.25)/(gunge_results.length+1));
           fill(252,168,92);
-          rect(width*0.3, height * (i+1)/(gunge_results.length+1), width*0.5*displayed_results[i][1]/max_gunge_result, height*0.1);
+          rect(width*0.3, height * (i+1)/(gunge_results.length+1), width*0.45*displayed_results[i][1]/max_gunge_result, height*0.1);
         }
         textAlign(LEFT, CENTER);
       }
@@ -320,7 +345,44 @@ function draw() {
       textFont(myFont);
       textSize(unitSize);
       text('GUNGE VOTES', 6.5*unitSize, 1.35*unitSize);
-      break;  
+      break;
+      
+    case MAIN_STATS:
+      background(0);
+      stroke(255,0,0);
+      strokeWeight(2);
+      v_x = 0.6*width/vote_history[0].length;
+      d_x = 0.2*width;
+      v_y = 0.6*height/max_gunge_result;
+      d_y = 0.75*height;
+      for (var i=1; i<=history_count; i++){
+        for (var g=0; g<4; g++){
+          stroke(gungee_colors[g]);
+          line((i-1)*v_x + d_x, 
+               d_y - (vote_history[g][i-1]*v_y), 
+               i*v_x + d_x, 
+               d_y - (vote_history[g][i]*v_y));
+        }
+      }
+      if (history_count < vote_history[0].length-1){
+        history_count++;
+      }
+      noStroke();
+      fill(252,168,92);
+      ellipse(5*unitSize, unitSize, unitSize, unitSize);
+      rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+      ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+      rect(11.25*unitSize, (0.5*unitSize), width-16.25*unitSize, unitSize);
+      fill(186,218,255);
+      textFont(myFont);
+      textSize(unitSize);
+      text('VOTE HISTORY', 6.5*unitSize, 1.35*unitSize);
+      for (var g=0; g<4; g++){
+        g_id = gungee_names[g][0]-1;
+        fill(gungee_colors[g_id]);
+        text(gungee_names[g][1], width*(0.15*g+0.2), 0.85*height);
+      }
+      break;
   }
 
   // Foreground layer
@@ -381,6 +443,8 @@ function pollDisplay(){
             gunge_results = data.results;
             max_gunge_result = data.max_result;
             displayed_results = data.results;
+            full_results = data.full_results;
+            processFullResults();
             max_gunge_result = 0;
             for (var i=0; i<displayed_results.length; i++){
               displayed_results[i][1] = 0;
@@ -403,6 +467,9 @@ function pollDisplay(){
       if (mode == MAIN_RESULTS){
         gunge_results = data.results;
         max_gunge_result = data.max_result;
+      }
+      if (mode == MAIN_STATS){
+        gungee_names = data.gungees;
       }
     }
   );

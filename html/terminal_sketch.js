@@ -6,6 +6,7 @@ var areas;
 var planet_data;
 var destination;
 var gungee_data;
+var loyalties;
 var jarvis_data;
 var vote_string;
 var max_votes = 0;
@@ -17,7 +18,7 @@ const TERM_PREVOTE = 3;
 const TERM_VOTE = 4;
 const TERM_SCREEN = 5;
 const TERM_RESULTS = 6;
-
+const TERM_STATS = 7;
 
 function preload() {
   myFont = loadFont('files/assets/FINALOLD.TTF');
@@ -37,6 +38,7 @@ function setup() {
   gridX = width / 10;
   gridY = height / 15;
   areas = [];
+  loyalties = [];
 }
 
 function windowResized(){
@@ -117,6 +119,13 @@ function reveal(choice){
 
 function logout(){
   $.getJSON('/logout/',
+    function(data, status){
+      beep();
+    });
+}
+
+function stats(){
+  $.getJSON('/stats/',
     function(data, status){
       beep();
     });
@@ -332,10 +341,37 @@ function draw() {
       textSize(gridY*0.5);
       text('4TH PLACE', 1.5*gridX, 3.5*gridY);
       text('3RD PLACE', 6*gridX, 3.5*gridY);
-      text('2ND PLACE', 1.5*gridX, 7.5*gridY);
-      text('1ST PLACE', 6*gridX, 7.5*gridY);
-      text('BOTH TOP 2', 1.5*gridX, 11.5*gridY);
+      text('2ND AND 1ST PLACE', 1.5*gridX, 7.5*gridY);
+      text('STATS', 1.5*gridX, 11.5*gridY);
       text('BACK TO ADMIN', 6*gridX, 11.5*gridY);
+      break;
+    
+    case TERM_STATS:
+      fill(252,168,92);
+      ellipse(gridX, height-gridY, gridX, gridY);
+      rect(gridX, height-1.5*gridY, 0.5*gridX, gridY);
+      ellipse(width-gridX, height-gridY, gridX, gridY);
+      rect(4.4*gridX, height-1.5*gridY, 4.6*gridX, gridY);
+      fill(186,218,255);
+      textFont(myFont);
+      textSize(gridY*0.70);
+      text('STATISTICS', 1.75*gridX, height-0.75*gridY);
+      for(var i=0; i<areas.length; i++){
+        areas[i].show();
+      }
+      fill(0);
+      textFont(myFont);
+      textSize(gridY*0.5);
+      text('BACK TO ADMIN', 6*gridX, 11.5*gridY);
+      fill(186,218,255);
+      textSize(gridY);
+      text('LOYALTIES', gridX, 2*gridY);
+      textSize(gridY*0.70);
+      for(var g=0; g<4; g++){
+        text(loyalties[g][2], gridX, (g+4)*gridY);
+        text(loyalties[g][0].toFixed(3), 4*gridX, (g+4)*gridY);
+        text(loyalties[g][1], 5.5*gridX, (g+4)*gridY);
+      }
       break;
   }
 }
@@ -346,6 +382,7 @@ function pollTerminal(){
     function (data, status){
       if(data.mode != mode){
         mode = data.mode;
+        loyalties = data.loyalties;
         switch(mode) {
           case TERM_BEEPS:
             areas = [];
@@ -400,9 +437,13 @@ function pollTerminal(){
             areas = [];
             areas.push(new Area(gridX, gridY, 3.5*gridX, 3*gridY, color(186,218,255), "reveal(4)"));
             areas.push(new Area(5.5*gridX, gridY, 3.5*gridX, 3*gridY, color(252,252,124), "reveal(3)"));
-            areas.push(new Area(gridX, 5*gridY, 3.5*gridX, 3*gridY, color(240,218,255), "reveal(2)"));
-            areas.push(new Area(5.5*gridX, 5*gridY, 3.5*gridX, 3*gridY, color(188,252,184), "reveal(1)"));
-            areas.push(new Area(gridX, 9*gridY, 3.5*gridX, 3*gridY, color(186,218,255), "reveal(-1)"));
+            areas.push(new Area(gridX, 5*gridY, 8*gridX, 3*gridY, color(240,218,255), "reveal(-1)"));
+            areas.push(new Area(gridX, 9*gridY, 3.5*gridX, 3*gridY, color(186,218,255), "stats"));
+            areas.push(new Area(5.5*gridX, 9*gridY, 3.5*gridX, 3*gridY, color(252,252,124), "admin"));
+            break;
+          case TERM_STATS:
+            gungee_data = data.gungees;
+            areas = [];
             areas.push(new Area(5.5*gridX, 9*gridY, 3.5*gridX, 3*gridY, color(252,252,124), "admin"));
             break;
         }

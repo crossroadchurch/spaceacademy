@@ -26,6 +26,7 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.TERM_VOTE = 4
         self.TERM_SCREEN = 5
         self.TERM_RESULTS = 6
+        self.TERM_STATS = 7
         self.MAIN_WARP = 0
         self.MAIN_ORBIT = 1
         self.MAIN_COMMS = 2
@@ -33,12 +34,15 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.MAIN_RESULTS = 4
         self.MAIN_PREVOTE = 5
         self.MAIN_VOTE = 6
+        self.MAIN_STATS = 7
         self.current_priv = 0
         self.current_name = ""
         self.max_votes = 0
         self.vote_mode = 0
         self.mainscreen_mode = 0
         self.published_results = []
+        self.full_results = []
+        self.loyalties = []
         self.max_result = 0
         self.current_planet = 0
         self.next_planet = 0
@@ -60,6 +64,16 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         for g in self.gungee_data:
             self.published_results.append([g[1], 0])
 
+        cursor.execute('''
+            SELECT v.GungeeId
+            FROM Vote AS v
+            ORDER BY v.VoteId ASC
+        ''')
+
+        f_r = list(cursor.fetchall())
+        for result in f_r:
+            self.full_results.append(result[0])
+
         db.close()
         return
 
@@ -75,7 +89,9 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
             "mode": self.mainscreen_mode,
             "sound_id": self.sound_id,
             "actor": self.sound_actor,
+            "gungees": self.gungee_data,
             "results": self.published_results,
+            "full_results": self.full_results,
             "max_result": self.max_result,
             "voter": self.current_name,
             "planet": self.current_planet
@@ -85,6 +101,7 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         return {
             "mode": self.terminal_mode,
             "gungees": self.gungee_data,
+            "loyalties": self.loyalties,
             "max_votes": self.max_votes
         }
 
@@ -148,6 +165,7 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
                         '''.format(gi = int(gungee_list[i]), ui = self.current_user, 
                                 vt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                         db.commit()
+                        self.full_results.append(int(gungee_list[i]))
                 db.close()
                 print("Vote cast")
                 self.terminal_mode = self.TERM_PREVOTE
@@ -273,6 +291,44 @@ class SpaceController(QtGui.QMainWindow, Ui_MainWindow):
         self.mainscreen_mode = self.MAIN_RESULTS
         self.terminal_mode = self.TERM_RESULTS
         return True
+    
+    def stats(self):
+        self.update_loyalties()
+        self.mainscreen_mode = self.MAIN_STATS
+        self.terminal_mode = self.TERM_STATS
+        return True
+
+    def update_loyalties(self):
+        db, cursor = self.db_connect()
+        cursor.execute('''
+            SELECT u.UserId, u.Name 
+            FROM User AS u
+            WHERE u.Privilege = 2
+        ''')
+        users = cursor.fetchall()
+        self.loyalties = [[0, "", ""], [0, "", ""], [0, "", ""], [0, "", ""]]
+
+        for user in users:
+            cursor.execute('''
+                SELECT Count(v.VoteId), v.GungeeId, g.GungeeName
+                FROM Vote AS v INNER JOIN Gungee AS g ON g.GungeeId = v.GungeeId
+                WHERE v.UserId = {uid}
+                GROUP BY v.GungeeId
+            '''.format(uid = user[0]))
+            results = cursor.fetchall()
+            if len(results) > 0:
+                vote_total = 0
+                for result in results:
+                    vote_total = vote_total + result[0]
+                for result in results:
+                    favour = result[0] / vote_total
+                    if favour > self.loyalties[result[1]-1][0]:
+                        self.loyalties[result[1]-1][0] = favour
+                        self.loyalties[result[1]-1][1] = user[1]
+                        self.loyalties[result[1]-1][2] = result[2]
+        db.close()
+        return
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
