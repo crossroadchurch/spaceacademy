@@ -37,6 +37,7 @@ const MAIN_VOTE = 6;
 const MAIN_STATS = 7;
 const ACTOR_JARVIS = 0;
 const ACTOR_MISSION = 1;
+const ACTOR_CODE = 4;
 
 function preload() {
   myFont = loadFont('files/assets/FINALOLD.TTF');
@@ -258,6 +259,25 @@ function draw() {
         today = new Date();
         stardate = (floor(today.getTime()/1000)/10000).toFixed(4);
         text('STARDATE ' + stardate, width/2, 2*unitSize + (height/2));
+        textAlign(LEFT, BASELINE);
+        fill(252,168,92);
+        ellipse(5*unitSize, unitSize, unitSize, unitSize);
+        rect(5*unitSize,0.5*unitSize, unitSize, unitSize);
+        ellipse(width-5*unitSize, unitSize, unitSize, unitSize);
+        rect(13*unitSize, (0.5*unitSize), width-18*unitSize, unitSize);
+        fill(186,218,255);
+        textFont(myFont);
+        textSize(unitSize);
+        text('INCOMING MESSAGE', 6.5*unitSize, 1.35*unitSize);
+      } else if (curActor == ACTOR_CODE){
+        background(0);
+        noStroke();
+        textFont(myFont)
+        textSize(1.8*unitSize);
+        fill(186,218,255);
+        textAlign(CENTER, CENTER);
+        text("MESSAGE FROM MISSION CONTROL", width/2, height/2);
+        text('7-2-3-9-5', width/2, 2*unitSize + (height/2));
         textAlign(LEFT, BASELINE);
         fill(252,168,92);
         ellipse(5*unitSize, unitSize, unitSize, unitSize);

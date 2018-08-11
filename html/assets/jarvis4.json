@@ -1,0 +1,29 @@
+{
+    "sounds": [
+        {
+            "filename": "files/assets/day4-computer1.mp3",
+            "caption": "You're not wrong there Captain",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/day4-computer2.mp3",
+            "caption": "Captain, Captain. There's a message",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/day4-computer3.mp3",
+            "caption": "But Captain it's really important",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/day4-silence.mp3",
+            "caption": "MESSAGE FROM MISSION CONTROL",
+            "actor": 4
+        },
+        {
+            "filename": "files/assets/day4-computer4.mp3",
+            "caption": "Captain there's another message",
+            "actor": 0
+        }
+    ]
+}

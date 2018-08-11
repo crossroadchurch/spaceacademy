@@ -1,0 +1,49 @@
+{
+    "sounds": [
+        {
+            "filename": "files/assets/day1-computer1.mp3",
+            "caption": "Oi Crew, get up here",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/day1-computer2.mp3",
+            "caption": "I'll see what I can do",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/day1-command1.mp3",
+            "caption": "This is Mission Command...",
+            "actor": 1
+        },
+        {
+            "filename": "files/assets/day1-command2.mp3",
+            "caption": "Now listen carefully",
+            "actor": 1
+        },
+        {
+            "filename": "files/assets/day1-command3.mp3",
+            "caption": "Yes you will be coming and going",
+            "actor": 1
+        },
+        {
+            "filename": "files/assets/day1-computer3.mp3",
+            "caption": "No chance. Looks like...",
+            "actor": 0
+        },
+        {
+            "filename": "files/assets/day1-command4.mp3",
+            "caption": "This is Mission Command.  Come in Captain",
+            "actor": 1
+        },
+        {
+            "filename": "files/assets/day1-command5.mp3",
+            "caption": "We have reason to believe that",
+            "actor": 1
+        },
+        {
+            "filename": "files/assets/day1-command6.mp3",
+            "caption": "Your mission is to travel the...",
+            "actor": 1
+        }
+    ]
+}
